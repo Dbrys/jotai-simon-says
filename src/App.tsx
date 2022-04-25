@@ -7,21 +7,52 @@ import styled from 'styled-components';
 const colors = ['red', 'yellow', 'blue', 'green'];
 
 const disabled = atom(false);
+const count = atom(2);
+const selected = atom('');
 
 function App() {
   const [isDisabled, setIsDisabled] = useAtom(disabled);
+  const [selectedButton, setSelectedButton] = useAtom(selected);
+  const [counter, setCounter] = useAtom(count);
+
+  const handleRandomSelect = async () => {
+    for (let x = 0; x < counter; x++) {
+      const currentSelection = Math.floor(Math.random() * colors.length);
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(setSelectedButton(colors[currentSelection]));
+        }, 1500);
+      });
+      await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve(setSelectedButton(''));
+        }, 1000);
+      });
+    }
+    setTimeout(() => {
+      setSelectedButton('');
+    }, 1000);
+    setCounter(counter + 1);
+  };
+
   const handleStartClick = () => {
     setIsDisabled(true);
+    handleRandomSelect();
   };
   return (
     <div className="App">
       <ButtonContainer>
         {colors.map((color, i) => {
+          const isSelectedColor = color === selectedButton;
           return (
             <Button
               key={i}
               type="primary"
-              style={{ backgroundColor: color }}
+              style={{
+                backgroundColor: color,
+                opacity: isSelectedColor ? 1 : 0.7,
+                outline: isSelectedColor ? '1px solid black' : '',
+              }}
             ></Button>
           );
         })}
@@ -52,7 +83,7 @@ const ButtonContainer = styled.div`
     margin: 10px;
     border-radius: 20%;
     :hover {
-      opacity: 0.7;
+      opacity: 1 !important;
       outline: 1px solid black;
     }
   }
