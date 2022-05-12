@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { Button } from 'antd';
 import { useAtom, atom } from 'jotai';
 import './App.css';
@@ -6,20 +6,23 @@ import styled from 'styled-components';
 
 const colors = ['red', 'yellow', 'blue', 'green'];
 
-const disabled = atom(false);
+const btnDisabled = atom(false);
+const startDisabled = atom(false);
 const count = atom(2);
 const selected = atom('');
 const simonSelections = atom<string[]>([]);
 const userSelections = atom<string[]>([]);
 
 function App() {
-  const [isDisabled, setIsDisabled] = useAtom(disabled);
+  const [startIsDisabled, setStartIsDisabled] = useAtom(startDisabled);
+  const [buttonsDisabled, setButtonsDisabled] = useAtom(btnDisabled);
   const [selectedButton, setSelectedButton] = useAtom(selected);
   const [counter, setCounter] = useAtom(count);
   const [simonSelected, setSimonSelected] = useAtom(simonSelections);
   const [usersSelection, setUserSelection] = useAtom(userSelections);
 
   const handleRandomSelect = async () => {
+    setButtonsDisabled(true);
     const selections = [];
     for (let x = 0; x < counter; x++) {
       const currentSelection = Math.floor(Math.random() * colors.length);
@@ -36,25 +39,37 @@ function App() {
       });
       setSimonSelected(selections);
     }
+    setCounter(counter + 1);
     setTimeout(() => {
       setSelectedButton('');
     }, 500);
-    setCounter(counter + 1);
-    setIsDisabled(false);
+    setButtonsDisabled(false);
   };
 
+  // TODO: clean up and pull reset logic out to standalone function
   const handleClick = (
     color: string
   ): React.MouseEventHandler<HTMLElement> | undefined => {
-    if (usersSelection.length) {
-      setUserSelection([...usersSelection, color]);
-      return;
+    if (usersSelection.length + 1 === counter - 1) {
+      if (
+        JSON.stringify([...usersSelection, color]) ===
+        JSON.stringify(simonSelected)
+      ) {
+        setUserSelection([]);
+        handleRandomSelect();
+        return;
+      }
+      alert('Game over');
+      setUserSelection([]);
+      setSimonSelected([]);
+      setCounter(2);
+      setStartIsDisabled(false);
     }
-    setUserSelection([color]);
+    setUserSelection([...usersSelection, color]);
   };
 
   const handleStartClick = () => {
-    setIsDisabled(true);
+    setStartIsDisabled(true);
     handleRandomSelect();
   };
   return (
@@ -64,7 +79,7 @@ function App() {
           const isSelectedColor = color === selectedButton;
           return (
             <Button
-              disabled={isDisabled}
+              disabled={buttonsDisabled}
               key={i}
               type="primary"
               onClick={() => handleClick(color)}
@@ -78,7 +93,7 @@ function App() {
         })}
       </ButtonContainer>
       <Button
-        disabled={isDisabled}
+        disabled={startIsDisabled}
         onClick={handleStartClick}
         type="primary"
         shape="round"
