@@ -9,30 +9,48 @@ const colors = ['red', 'yellow', 'blue', 'green'];
 const disabled = atom(false);
 const count = atom(2);
 const selected = atom('');
+const simonSelections = atom<string[]>([]);
+const userSelections = atom<string[]>([]);
 
 function App() {
   const [isDisabled, setIsDisabled] = useAtom(disabled);
   const [selectedButton, setSelectedButton] = useAtom(selected);
   const [counter, setCounter] = useAtom(count);
+  const [simonSelected, setSimonSelected] = useAtom(simonSelections);
+  const [usersSelection, setUserSelection] = useAtom(userSelections);
 
   const handleRandomSelect = async () => {
+    const selections = [];
     for (let x = 0; x < counter; x++) {
       const currentSelection = Math.floor(Math.random() * colors.length);
+      selections.push(colors[currentSelection]);
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve(setSelectedButton(colors[currentSelection]));
-        }, 1500);
+        }, 1000);
       });
       await new Promise((resolve) => {
         setTimeout(() => {
           resolve(setSelectedButton(''));
-        }, 1000);
+        }, 750);
       });
+      setSimonSelected(selections);
     }
     setTimeout(() => {
       setSelectedButton('');
-    }, 1000);
+    }, 500);
     setCounter(counter + 1);
+    setIsDisabled(false);
+  };
+
+  const handleClick = (
+    color: string
+  ): React.MouseEventHandler<HTMLElement> | undefined => {
+    if (usersSelection.length) {
+      setUserSelection([...usersSelection, color]);
+      return;
+    }
+    setUserSelection([color]);
   };
 
   const handleStartClick = () => {
@@ -46,8 +64,10 @@ function App() {
           const isSelectedColor = color === selectedButton;
           return (
             <Button
+              disabled={isDisabled}
               key={i}
               type="primary"
+              onClick={() => handleClick(color)}
               style={{
                 backgroundColor: color,
                 opacity: isSelectedColor ? 1 : 0.7,
