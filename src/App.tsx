@@ -47,8 +47,6 @@ function App() {
     setButtonsDisabled(false);
   };
 
-  const gameOver = () => {};
-
   // TODO: clean up and pull reset logic out to standalone function
   const handleClick = (
     color: string
