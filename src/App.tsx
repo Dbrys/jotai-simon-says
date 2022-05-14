@@ -1,5 +1,5 @@
-import React, { useEffect, useCallback } from 'react';
-import { Button } from 'antd';
+import React, { useState } from 'react';
+import { Button, Modal } from 'antd';
 import { useAtom, atom } from 'jotai';
 import './App.css';
 import styled from 'styled-components';
@@ -20,6 +20,7 @@ function App() {
   const [counter, setCounter] = useAtom(count);
   const [simonSelected, setSimonSelected] = useAtom(simonSelections);
   const [usersSelection, setUserSelection] = useAtom(userSelections);
+  const [showGameOverModal, setShowGameOverModal] = useState(false);
 
   const handleRandomSelect = async () => {
     setButtonsDisabled(true);
@@ -46,6 +47,8 @@ function App() {
     setButtonsDisabled(false);
   };
 
+  const gameOver = () => {};
+
   // TODO: clean up and pull reset logic out to standalone function
   const handleClick = (
     color: string
@@ -59,7 +62,7 @@ function App() {
         handleRandomSelect();
         return;
       }
-      alert('Game over');
+      setShowGameOverModal(true);
       setUserSelection([]);
       setSimonSelected([]);
       setCounter(2);
@@ -101,6 +104,16 @@ function App() {
       >
         Start
       </Button>
+
+      <Modal
+        cancelButtonProps={{ style: { display: 'none' } }}
+        visible={showGameOverModal}
+        onOk={() => setShowGameOverModal(false)}
+      >
+        <ModalContent>
+          <h2>Game Over!</h2>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
@@ -122,6 +135,12 @@ const ButtonContainer = styled.div`
       outline: 1px solid black;
     }
   }
+`;
+
+const ModalContent = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
 `;
 
 export default App;
