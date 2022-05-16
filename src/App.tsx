@@ -76,12 +76,12 @@ function App() {
   return (
     <div className="App">
       <ButtonContainer>
-        {colors.map((color, i) => {
+        {colors.map((color) => {
           const isSelectedColor = color === selectedButton;
           return (
             <Button
               disabled={buttonsDisabled}
-              key={i}
+              key={color}
               type="primary"
               onClick={() => handleClick(color)}
               style={{
